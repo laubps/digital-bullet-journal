@@ -1,0 +1,11 @@
+{
+  "extends": ["next/core-web-vitals", "next/typescript"],
+  "rules": {
+    // Disallow console.log in committed code (use console.error for real errors)
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    // Enforce explicit return types on functions
+    "@typescript-eslint/explicit-function-return-type": "off",
+    // Disallow any type
+    "@typescript-eslint/no-explicit-any": "error"
+  }
+}

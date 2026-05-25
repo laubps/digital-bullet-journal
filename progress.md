@@ -5,7 +5,7 @@
 | Step | Area | Status |
 |------|------|--------|
 | 1 | Data Model | ✅ Done |
-| 2 | Project Setup | 🔲 Not started |
+| 2 | Project Setup | ✅ Done |
 | 3 | DB Connection | 🔲 Not started |
 | 4 | Authentication | 🔲 Not started |
 | 5 | Mood Tracker | 🔲 Not started |

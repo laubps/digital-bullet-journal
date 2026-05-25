@@ -1,5 +1,56 @@
-# Data model diagrams
+# ──────────────────────────────────────────────
+# Data model diagrams & SQL (project-specific)
+# ──────────────────────────────────────────────
 diagrams/data-models/
-
-# SQL scripts
 *.sql
+
+# ──────────────────────────────────────────────
+# Environment variables — NEVER commit real secrets
+# ──────────────────────────────────────────────
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ──────────────────────────────────────────────
+# Oracle Database — wallet & credential files
+# ──────────────────────────────────────────────
+*.p12
+*.sso
+*.ora
+cwallet.sso
+ewallet.p12
+tnsnames.ora
+sqlnet.ora
+ojdbc.properties
+wallet/
+
+# ──────────────────────────────────────────────
+# Node / Next.js
+# ──────────────────────────────────────────────
+node_modules/
+.next/
+out/
+build/
+.pnp
+.pnp.js
+
+# ──────────────────────────────────────────────
+# TypeScript
+# ──────────────────────────────────────────────
+*.tsbuildinfo
+next-env.d.ts
+
+# ──────────────────────────────────────────────
+# Testing & coverage
+# ──────────────────────────────────────────────
+coverage/
+
+# ──────────────────────────────────────────────
+# IDE & OS
+# ──────────────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
