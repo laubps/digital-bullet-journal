@@ -13,12 +13,16 @@
   },
   "dependencies": {
     "next": "^15.0.0",
+    "oci-common": "^2.132.0",
+    "oci-secrets": "^2.132.0",
+    "oracledb": "^6.10.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

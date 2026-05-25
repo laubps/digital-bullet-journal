@@ -5,7 +5,7 @@
 
 ---
 
-## Automated TestsOkay
+## Automated Tests
 
 Run with `npm test`:
 
@@ -23,7 +23,7 @@ Time:        1.302 s
 
 ---
 
-## Manual Browser Tests
+## Manual Tests
 
 Run with `npm run dev` → open `http://localhost:3000`.
 

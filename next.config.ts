@@ -45,6 +45,16 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  /**
+   * Prevent webpack from trying to bundle native Node.js addons and heavy
+   * OCI SDK packages. oracledb ships a prebuilt .node binary that webpack
+   * cannot process; oci-common / oci-secrets pull in large trees with
+   * optional native deps. Marking them external means Next.js will
+   * require() them at runtime instead of bundling — this is what stops
+   * `next dev` from hanging at "starting…".
+   */
+  serverExternalPackages: ['oracledb', 'oci-common', 'oci-secrets'],
+
   async headers() {
     return [
       {
