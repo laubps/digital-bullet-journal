@@ -1,0 +1,141 @@
+PASS 1a — Morning run streak = 2  (expected 2)
+
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:00.017
+
+
+PASS 1b — Read 20 pages streak = 0  (expected 0)
+
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:00.008
+
+
+PASS 1c — Unknown habit streak = 0 (no error expected for missing habit).
+
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:00.019
+
+
+--- 2a Morning run stats ---
+  streak         = 2  (expected 2)
+  completion_pct = 13.33  (expected 13.33)
+PASS 2a-streak
+PASS 2a-completion_pct
+
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:00.015
+
+
+--- 2b Read 20 pages stats ---
+  streak         = 0  (expected 0)
+  completion_pct = 0  (expected 0)
+PASS 2b-streak
+PASS 2b-completion_pct
+
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:00.006
+
+
+PASS 2c — Non-existent habit raised ORA-20011: ORA-20011: Habit not found: 00000000-0000-0000-0000-000000000000
+
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:00.011
+
+
+--- 3a month range ---
+  start_date    = 2026-05-01
+  end_date      = 2026-05-31
+  current_count = 3  (expected 3)
+  saved_count   = 2  (expected 2)
+  can_run       = 1  (expected 1)
+  entry 1: 2026-05-23 | <p>Yesterday I struggled with focus but managed to push thro
+  entry 2: 2026-05-24 | <p>Today was a productive day. I finished the project report
+  entry 3: 2026-05-24 | <p>Evening reflection: feeling calm and grateful.</p>
+  cursor rows   = 3  (expected 3)
+PASS 3a-current_count
+PASS 3a-saved_count
+PASS 3a-can_run
+PASS 3a-cursor_rows
+
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:00.021
+
+
+--- 3b day range ---
+  start_date    = 2026-05-24
+  current_count = 2  (expected 2)
+  saved_count   = 0  (expected 0)
+  can_run       = 1  (expected 1)
+  entry 1: <p>Today was a productive day. I finished the project report
+  entry 2: <p>Evening reflection: feeling calm and grateful.</p>
+  cursor rows   = 2  (expected 2)
+PASS 3b-current_count
+PASS 3b-saved_count
+PASS 3b-can_run
+PASS 3b-cursor_rows
+
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:00.010
+
+
+--- 3c year range ---
+  start_date    = 2026-01-01
+  end_date      = 2026-12-31
+  current_count = 3  (expected 3)
+  saved_count   = 0  (expected 0)
+  can_run       = 1  (expected 1)
+  cursor rows   = 3  (expected 3)
+PASS 3c — year range all checks passed
+
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:00.008
+
+
+--- 3d can_run=0 scenario ---
+  current_count = 2  (expected 2)
+  saved_count   = 2  (expected 2)
+  can_run       = 0  (expected 0)
+PASS 3d — can_run=0 and cursor is NULL as expected
+
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:00.010
+
+
+PASS 3e — Invalid time_range raised expected error (-20021): ORA-20021: proc_fetch_analysis_input error: ORA-20020: Invalid time_range "decade". Allowed values: day, week, weekend, month, year.
+
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:00.006
+
+
+--- 3f Bob (no entries) ---
+  current_count = 0  (expected 0)
+  saved_count   = 0  (expected 0)
+  can_run       = 0  (expected 0)
+PASS 3f — Bob with no entries: can_run=0 as expected
+
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:00.006

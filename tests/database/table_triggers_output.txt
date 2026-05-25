@@ -1,0 +1,326 @@
+1 row inserted.
+
+Elapsed: 00:00:00.053
+
+
+1 row inserted.
+
+Elapsed: 00:00:00.004
+
+
+Commit complete.
+
+Elapsed: 00:00:00.003
+
+
+EMAIL          CATEGORY 
+-------------- -------- 
+alice@test.com Academia 
+alice@test.com Career   
+alice@test.com Personal 
+bob@test.com   Academia 
+bob@test.com   Career   
+bob@test.com   Personal 
+
+
+Elapsed: 00:00:00.011
+6 rows selected.
+
+
+1 row inserted.
+
+Elapsed: 00:00:00.003
+
+
+Commit complete.
+
+Elapsed: 00:00:00.003
+
+
+ID                                   NAME     
+------------------------------------ -------- 
+5299d060-54da-ecb2-e063-625b000a35ff Academia 
+5299d060-54d8-ecb2-e063-625b000a35ff Career   
+bbbbbbbb-0000-0000-0000-000000000001 Health   
+5299d060-54d9-ecb2-e063-625b000a35ff Personal 
+
+
+Elapsed: 00:00:00.079
+4 rows selected.
+
+
+ID                                   NAME    
+------------------------------------ ------- 
+e1000000-0000-0000-0000-000000000005 Angry   
+e1000000-0000-0000-0000-000000000003 Anxious 
+e1000000-0000-0000-0000-000000000004 Calm    
+e1000000-0000-0000-0000-000000000006 Excited 
+e1000000-0000-0000-0000-000000000001 Happy   
+e1000000-0000-0000-0000-000000000008 Neutral 
+e1000000-0000-0000-0000-000000000002 Sad     
+e1000000-0000-0000-0000-000000000007 Tired   
+
+
+Elapsed: 00:00:00.005
+8 rows selected.
+
+
+1 row inserted.
+
+Elapsed: 00:00:00.060
+
+
+1 row inserted.
+
+Elapsed: 00:00:00.003
+
+
+1 row inserted.
+
+Elapsed: 00:00:00.003
+
+
+Commit complete.
+
+Elapsed: 00:00:00.003
+
+
+ID                                   EMOTION ENTRY_DATE             
+------------------------------------ ------- ---------------------- 
+cccccccc-0000-0000-0000-000000000002 Calm    5/24/2026, 12:00:00 AM 
+cccccccc-0000-0000-0000-000000000001 Happy   5/24/2026, 12:00:00 AM 
+cccccccc-0000-0000-0000-000000000003 Sad     5/23/2026, 12:00:00 AM 
+
+
+Elapsed: 00:00:00.009
+3 rows selected.
+
+
+1 row inserted.
+
+Elapsed: 00:00:00.074
+
+
+1 row inserted.
+
+Elapsed: 00:00:00.004
+
+
+1 row inserted.
+
+Elapsed: 00:00:00.003
+
+
+Commit complete.
+
+Elapsed: 00:00:00.003
+
+
+ID                                   ENTRY_DATE             PREVIEW                                            
+------------------------------------ ---------------------- -------------------------------------------------- 
+dddddddd-0000-0000-0000-000000000001 5/24/2026, 12:00:00 AM <p>Today was a productive day. I finished the proj 
+dddddddd-0000-0000-0000-000000000002 5/24/2026, 12:00:00 AM <p>Evening reflection: feeling calm and grateful.< 
+dddddddd-0000-0000-0000-000000000003 5/23/2026, 12:00:00 AM <p>Yesterday I struggled with focus but managed to 
+
+
+Elapsed: 00:00:00.010
+3 rows selected.
+
+
+1 row inserted.
+
+Elapsed: 00:00:00.021
+
+
+1 row inserted.
+
+Elapsed: 00:00:00.004
+
+
+Commit complete.
+
+Elapsed: 00:00:00.003
+
+
+ID                                   NAME          TARGET_DAYS IS_ACTIVE 
+------------------------------------ ------------- ----------- --------- 
+eeeeeeee-0000-0000-0000-000000000001 Morning run            30         1 
+eeeeeeee-0000-0000-0000-000000000002 Read 20 pages          66         1 
+
+
+Elapsed: 00:00:00.010
+2 rows selected.
+
+
+1 row inserted.
+
+Elapsed: 00:00:00.023
+
+
+1 row inserted.
+
+Elapsed: 00:00:00.003
+
+
+1 row inserted.
+
+Elapsed: 00:00:00.004
+
+
+1 row inserted.
+
+Elapsed: 00:00:00.003
+
+
+1 row inserted.
+
+Elapsed: 00:00:00.003
+
+
+Commit complete.
+
+Elapsed: 00:00:00.003
+
+
+CHECK_DATE             DONE 
+---------------------- ---- 
+5/20/2026, 12:00:00 AM    1 
+5/21/2026, 12:00:00 AM    1 
+5/22/2026, 12:00:00 AM    0 
+5/23/2026, 12:00:00 AM    1 
+5/24/2026, 12:00:00 AM    1 
+
+
+Elapsed: 00:00:00.007
+5 rows selected.
+
+
+1 row inserted.
+
+Elapsed: 00:00:00.059
+
+
+Commit complete.
+
+Elapsed: 00:00:00.003
+
+
+ID                                   TIME_RANGE START_DATE            END_DATE               JOURNAL_ENTRY_COUNT 
+------------------------------------ ---------- --------------------- ---------------------- ------------------- 
+a0a0a0a0-0000-0000-0000-000000000001 month      5/1/2026, 12:00:00 AM 5/31/2026, 11:42:25 PM                   2 
+
+
+Elapsed: 00:00:00.010
+1 rows selected.
+
+
+1 row inserted.
+
+Elapsed: 00:00:00.026
+
+
+1 row inserted.
+
+Elapsed: 00:00:00.004
+
+
+1 row inserted.
+
+Elapsed: 00:00:00.003
+
+
+1 row inserted.
+
+Elapsed: 00:00:00.003
+
+
+1 row inserted.
+
+Elapsed: 00:00:00.003
+
+
+Commit complete.
+
+Elapsed: 00:00:00.003
+
+
+RANK EMOTION 
+---- ------- 
+   1 Happy   
+   2 Calm    
+   3 Excited 
+   4 Sad     
+   5 Neutral 
+
+
+Elapsed: 00:00:00.010
+5 rows selected.
+
+
+PASS 10a — duplicate email rejected: ORA-00001: unique constraint (ADMIN.UK_USERS_EMAIL) violated on table ADMIN.USERS columns (EMAIL)
+ORA-03301: (ORA-00001 details) row with column values (EMAIL:'alice@test.com') already exists
+
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:00.033
+
+
+PASS 10b — target_days < 22 rejected: ORA-02290: check constraint (ADMIN.CK_HABITS_TARGET_DAYS) violated
+
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:00.014
+
+
+PASS 10c — duplicate checkin date rejected: ORA-00001: unique constraint (ADMIN.UK_HABIT_CHECKINS_DATE) violated on table ADMIN.HABIT_CHECKINS columns (HABIT_ID, CHECK_DATE)
+ORA-03301: (ORA-00001 details) row with column values (HABIT_ID:'eeeeeeee-0000-0000-0000-000000000001', CHECK_DATE:24-MAY-26) already exists
+
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:00.013
+
+
+PASS 10d — cross-user checkin rejected: ORA-20001: habit_checkins.user_id does not match the owner of habit eeeeeeee-0000-0000-0000-000000000001
+ORA-06512: at "ADMIN.TRG_VALIDATE_CHECKIN_OWNERSHIP", line 10
+ORA-04088: error during execution of trigger 'ADMIN.TRG_VALIDATE_CHECKIN_OWNERSHIP'
+
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:00.012
+
+
+PASS 10e — invalid time_range rejected: ORA-02290: check constraint (ADMIN.CK_ANALYSES_TIME_RANGE) violated
+
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:00.011
+
+
+PASS 10f — duplicate period analysis rejected: ORA-00001: unique constraint (ADMIN.UK_ANALYSES_PERIOD) violated on table ADMIN.ANALYSES columns (USER_ID, TIME_RANGE, START_DATE)
+ORA-03301: (ORA-00001 details) row with column values (USER_ID:'aaaaaaaa-0000-0000-0000-000000000001', TIME_RANGE:'month', START_DATE:01-MAY-26) already exists
+
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:00.014
+
+
+PASS 10g — rank > 5 rejected: ORA-02290: check constraint (ADMIN.CK_ATE_RANK) violated
+
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:00.010
+
+
+PASS 11 — updated_at was auto-updated by trigger.
+
+
+PL/SQL procedure successfully completed.
+
+Elapsed: 00:00:01.014

@@ -1,0 +1,5 @@
+# Data model diagrams
+diagrams/data-models/
+
+# SQL scripts
+*.sql
