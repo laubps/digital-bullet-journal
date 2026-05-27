@@ -1,3 +1,23 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes petal-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes petal-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+@keyframes petal-fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes petal-card-in {
+  from { opacity: 0; transform: translateY(16px) rotate(-0.5deg); }
+  to   { opacity: 1; transform: translateY(0) rotate(-0.5deg); }
+}

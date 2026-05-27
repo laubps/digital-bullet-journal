@@ -12,6 +12,8 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.9.6",
     "next": "^15.0.0",
     "oci-common": "^2.132.0",
     "oci-secrets": "^2.132.0",
@@ -22,6 +24,7 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
+    "@types/bcryptjs": "^2.4.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",

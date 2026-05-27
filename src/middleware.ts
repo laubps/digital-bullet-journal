@@ -1,21 +1,25 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-/** Paths accessible without a valid session token. */
-const PUBLIC_PATHS = ['/login', '/signup'];
+/** Paths that only unauthenticated users should see. */
+const AUTH_ONLY_PATHS = ['/login', '/signup'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const token = request.cookies.get('token');
+  const isAuthenticated = Boolean(token);
 
-  // Allow public auth pages
-  const isPublic = PUBLIC_PATHS.some(
+  const isAuthPage = AUTH_ONLY_PATHS.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`),
   );
-  if (isPublic) return NextResponse.next();
 
-  // Check for session token (set as httpOnly cookie in Step 4)
-  const token = request.cookies.get('token');
-  if (!token) {
+  // Authenticated user trying to access login/signup or root → send to dashboard
+  if (isAuthenticated && (isAuthPage || pathname === '/')) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
+  // Unauthenticated user trying to access a protected route → send to login
+  if (!isAuthenticated && !isAuthPage) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('from', pathname);
     return NextResponse.redirect(loginUrl);
@@ -25,11 +29,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  /**
-   * Run middleware on all routes except:
-   * - Next.js internals (_next/static, _next/image)
-   * - favicon
-   * - API routes (each API route handles its own auth)
-   */
-  matcher: ['/((?!_next/static|_next/image|favicon\\.ico|api/).*)',],
+  matcher: ['/((?!_next/static|_next/image|favicon\\.ico|api/|videos/|images/|fonts/).*)',],
 };
