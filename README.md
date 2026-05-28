@@ -229,7 +229,7 @@ npm test
 
 ## Capturas de pantalla
 
-> Las capturas de pantalla se encuentran en esta carpeta de drive y en el documento PDF de entrega del proyecto.
+> Las capturas de pantalla se encuentran en [esta](https://drive.google.com/drive/folders/1dCkLI_3sQnDzXTX4Vh50cq9YaFyqZeZd?usp=sharing) carpeta de drive y en el documento PDF de entrega del proyecto.
 
 ---
 
@@ -261,6 +261,6 @@ El módulo de Analizador de Emociones, planificado para la siguiente versión, r
 | Campo | Detalle |
 |---|---|
 | Materia | Desarrollo de Aplicaciones Web en la Nube y Móviles |
-| Profesor | [Nombre del Profesor] |
+| Profesor | ZEUS EMANUEL GUTIERREZ COBIAN |
 | Integrante | Laura |
 | Ciclo escolar | 2025 |
