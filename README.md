@@ -233,6 +233,19 @@ npm test
 
 ---
 
+## Futuras funcionalidades
+
+### Analizador de Emociones
+Integración con la Claude API para analizar patrones emocionales a partir de las entradas de diario y estado de ánimo. El usuario podrá seleccionar un rango de tiempo (día, semana, mes o año) y recibir un resumen desde una perspectiva psicológica de sus tendencias emocionales.
+
+### Personalización visual
+Configuración de tema por usuario: selección de paleta de colores y tipo de fuente dentro de la aplicación, para que cada persona pueda adaptar la interfaz a su estilo personal.
+
+### Migración a servidor en la nube
+Despliegue de la aplicación en infraestructura cloud (Vercel para el frontend y Oracle Cloud para la base de datos) para mejorar los tiempos de respuesta y disponibilidad, eliminando la dependencia del servidor local de desarrollo.
+
+---
+
 ## Conclusión
 
 Digital Bullet Journal nació de la necesidad de tener una herramienta de introspección personal que fuera más que un simple diario: un sistema que ayude a ver patrones en el estado de ánimo, a construir hábitos de manera sostenida y a reflexionar de forma estructurada sobre el bienestar mental.
