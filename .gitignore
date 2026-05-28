@@ -5,6 +5,11 @@ diagrams/data-models/
 *.sql
 
 # ──────────────────────────────────────────────
+# Homework / coursework deliverables (kept local)
+# ──────────────────────────────────────────────
+homework/
+
+# ──────────────────────────────────────────────
 # Environment variables — NEVER commit real secrets
 # ──────────────────────────────────────────────
 .env

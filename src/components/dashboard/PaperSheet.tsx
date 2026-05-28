@@ -6,9 +6,10 @@ import { C } from '@/lib/ui/theme';
 type Props = {
   children: ReactNode;
   style?: CSSProperties;
+  showBack?: boolean;
 };
 
-export default function PaperSheet({ children, style }: Props) {
+export default function PaperSheet({ children, style, showBack = true }: Props) {
   const wrap: CSSProperties = {
     position: 'relative',
     ...style,
@@ -29,7 +30,7 @@ export default function PaperSheet({ children, style }: Props) {
     border: `1.5px solid ${C.lineColor}`,
     borderRadius: 10,
     overflow: 'hidden',
-    boxShadow: `0 6px 18px ${C.paperShadow}, 0 2px 4px rgba(0,0,0,0.08)`,
+    boxShadow: showBack ? `0 6px 18px ${C.paperShadow}, 0 2px 4px rgba(0,0,0,0.08)` : 'none',
     zIndex: 1,
     height: '100%',
     display: 'flex',
@@ -37,7 +38,7 @@ export default function PaperSheet({ children, style }: Props) {
   };
   return (
     <div style={wrap}>
-      <div style={back} />
+      {showBack ? <div style={back} /> : null}
       <div style={front}>{children}</div>
     </div>
   );

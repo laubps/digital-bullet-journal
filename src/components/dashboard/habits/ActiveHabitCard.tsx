@@ -1,23 +1,43 @@
 'use client';
 
 import type { CSSProperties } from 'react';
+import { useRouter } from 'next/navigation';
 import { C, mono } from '@/lib/ui/theme';
-import { ROUND_SIZE, type ActiveHabit } from './types';
+import { ROUND_SIZE, currentRound, todayLocalIso, dateForDayOffset } from '@/lib/habits/days';
+import type { Checkin } from '@/components/habits/HabitCheckinGrid';
+
+export type ActiveHabit = {
+  id: string;
+  name: string;
+  targetDays: number;
+  startDate: string;
+  checkins: Checkin[];
+};
 
 type Props = {
   habit: ActiveHabit;
-  onMore: () => void;
+  onToggle: (habitId: string, date: string, currentDone: boolean) => void;
 };
 
-export default function ActiveHabitCard({ habit, onMore }: Props) {
+export default function ActiveHabitCard({ habit, onToggle }: Props) {
+  const router = useRouter();
+  const today = todayLocalIso();
+  const round = currentRound(habit.startDate, today);
+  const roundStart = (round - 1) * ROUND_SIZE;
+  const roundEnd = Math.min(roundStart + ROUND_SIZE, habit.targetDays);
+  const visible = Math.max(0, roundEnd - roundStart);
+
+  const doneByDate = new Map<string, boolean>();
+  for (const c of habit.checkins) doneByDate.set(c.checkDate, c.done);
+
   const tile: CSSProperties = {
     background: C.cardBg,
     border: `1.5px solid ${C.lineColor}`,
     borderRadius: 6,
-    padding: 7,
+    padding: 8,
     display: 'flex',
     flexDirection: 'column',
-    gap: 5,
+    gap: 6,
     aspectRatio: '1 / 1',
   };
 
@@ -30,18 +50,19 @@ export default function ActiveHabitCard({ habit, onMore }: Props) {
 
   const name: CSSProperties = {
     fontFamily: mono,
-    fontSize: 8,
-    letterSpacing: '0.1em',
+    fontSize: 9,
+    letterSpacing: '0.08em',
     textTransform: 'uppercase',
-    color: C.textSecondary,
+    color: C.textPrimary,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
+    cursor: 'pointer',
   };
 
-  const round: CSSProperties = {
+  const roundBadge: CSSProperties = {
     fontFamily: mono,
-    fontSize: 7,
+    fontSize: 8,
     letterSpacing: '0.1em',
     textTransform: 'uppercase',
     color: C.darkPink,
@@ -54,69 +75,64 @@ export default function ActiveHabitCard({ habit, onMore }: Props) {
   const grid: CSSProperties = {
     flex: 1,
     display: 'grid',
-    gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
-    gap: 2,
+    gridTemplateColumns: 'repeat(6, minmax(0, 1fr))',
+    gap: 3,
     alignContent: 'start',
     minWidth: 0,
-  };
-
-  const moreBtn: CSSProperties = {
-    gridColumn: 'span 3',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    fontFamily: mono,
-    fontSize: 8,
-    letterSpacing: '0.1em',
-    textTransform: 'uppercase',
-    color: C.textSecondary,
-    background: 'transparent',
-    border: 'none',
-    padding: 0,
-    cursor: 'pointer',
-  };
-
-  const plus: CSSProperties = {
-    width: 12,
-    height: 12,
-    borderRadius: '50%',
-    border: `1px solid ${C.lineColor}`,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: 10,
-    lineHeight: 1,
-    color: C.lineColor,
   };
 
   return (
     <div style={tile}>
       <div style={head}>
-        <div style={name}>{habit.name}</div>
-        <div style={round}>R{habit.round}</div>
+        <div style={name} onClick={() => router.push(`/habits/${habit.id}`)} title={habit.name}>
+          {habit.name}
+        </div>
+        <div style={roundBadge}>R{round}</div>
       </div>
       <div style={grid}>
-        {Array.from({ length: ROUND_SIZE }).map((_, i) => {
-          const checked = i < habit.cells.length && habit.cells[i] === true;
-          const missed = i < habit.cells.length && habit.cells[i] === false;
+        {Array.from({ length: visible }).map((_, i) => {
+          const dayIndex = roundStart + i;
+          const dayNumber = dayIndex + 1;
+          const date = dateForDayOffset(habit.startDate, dayIndex);
+          const done = doneByDate.get(date) === true;
+          const isFuture = date > today;
+
+          const cellStyle: CSSProperties = {
+            aspectRatio: '1 / 1',
+            background: done ? C.darkPink : 'transparent',
+            border: `1px solid ${C.lineColor}`,
+            borderRadius: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontFamily: mono,
+            fontSize: 8,
+            color: done ? '#fff' : isFuture ? C.textSecondary : C.textPrimary,
+            opacity: isFuture ? 0.35 : 1,
+            cursor: isFuture ? 'default' : 'pointer',
+            padding: 0,
+            minWidth: 0,
+          };
+
+          if (isFuture) {
+            return (
+              <div key={dayIndex} style={cellStyle} title={`Day ${dayNumber} · ${date}`}>
+                {dayNumber}
+              </div>
+            );
+          }
           return (
-            <div
-              key={i}
-              style={{
-                aspectRatio: '1 / 1',
-                background: checked ? C.darkPink : 'transparent',
-                border: `1px solid ${C.lineColor}`,
-                borderRadius: 1,
-                opacity: checked ? 0.9 : missed ? 0.35 : 0.4,
-              }}
-            />
+            <button
+              key={dayIndex}
+              type="button"
+              onClick={() => onToggle(habit.id, date, done)}
+              title={`Day ${dayNumber} · ${date}`}
+              style={cellStyle}
+            >
+              {dayNumber}
+            </button>
           );
         })}
-        <button type="button" onClick={onMore} style={moreBtn}>
-          <span style={plus}>+</span>
-          ver más
-        </button>
       </div>
     </div>
   );

@@ -18,8 +18,8 @@ type Item = {
 const ITEMS: Item[] = [
   { label: 'Dashboard', href: '/dashboard' },
   { label: 'Mood Tracker', href: '/mood/dashboard' },
-  { label: 'Habit Tracker', href: '/habits', disabled: true },
-  { label: 'Journal', href: '/journal', disabled: true },
+  { label: 'Habit Tracker', href: '/habits' },
+  { label: 'Journal', href: '/journal/dashboard' },
   { label: 'Emotions Analyzer', href: '/emotions', disabled: true },
 ];
 

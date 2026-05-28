@@ -19,8 +19,11 @@ export default function PageShell({ title, subtitle, children, maxWidth = 900 }:
     position: 'relative',
     minHeight: '100vh',
     width: '100%',
-    padding: '32px 24px 64px',
+    padding: '32px 24px',
     overflow: 'hidden',
+    display: 'flex',
+    alignItems: 'safe center',
+    justifyContent: 'safe center',
   };
 
   const outer: CSSProperties = {
@@ -67,8 +70,8 @@ export default function PageShell({ title, subtitle, children, maxWidth = 900 }:
       <div style={outer}>
         <div style={inner}>
           <div style={headerBar}>
-            <button type="button" onClick={() => router.push('/dashboard')} style={back}>
-              ← dashboard
+            <button type="button" onClick={() => router.back()} style={back}>
+              ← back
             </button>
             <div style={T.brandTitle(28)}>{title}</div>
             {subtitle ? (

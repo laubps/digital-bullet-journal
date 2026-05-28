@@ -329,7 +329,7 @@ export default function MoodPage() {
           </button>
           <button
             type="button"
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.back()}
             style={cancelBtn}
             disabled={submitting}
           >

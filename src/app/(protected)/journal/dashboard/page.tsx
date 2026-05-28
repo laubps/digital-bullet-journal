@@ -9,28 +9,35 @@ import ErrorState from '@/components/ErrorState';
 import PageBackground from '@/components/PageBackground';
 import Card from '@/lib/ui/Card';
 
-const MOODS = ['Happy', 'Sad', 'Anxious', 'Calm', 'Angry', 'Excited', 'Tired', 'Neutral'] as const;
-
 type Category = { id: string; name: string };
 
 type Entry = {
   id: string;
-  mood: string;
   entryDate: string;
   createdAt: string;
   categoryId: string | null;
   categoryName: string | null;
+  content: string;
 };
 
-type FilterKey = 'date' | 'category' | 'mood';
+type FilterKey = 'date' | 'category';
 
-export default function MoodDashboardPage() {
+/** Strip HTML and collapse whitespace for a one-line preview. */
+function plainPreview(html: string, max = 180): string {
+  const text = html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return text.length > max ? `${text.slice(0, max)}…` : text;
+}
+
+export default function JournalDashboardPage() {
   const router = useRouter();
   const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [categoryId, setCategoryId] = useState('');
-  const [mood, setMood] = useState('');
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -48,14 +55,11 @@ export default function MoodDashboardPage() {
         const data = (await res.json()) as { categories?: Category[] };
         if (Array.isArray(data.categories)) setCategories(data.categories);
       } catch {
-        // Non-critical; category filter just stays empty.
+        // optional; ignore
       }
     })();
   }, []);
 
-  // Refetch when any filter changes. The first failure on the *initial* load
-  // is treated as fatal (full ErrorState); failures after the user is already
-  // viewing data show a non-blocking inline error so they don't lose context.
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -66,19 +70,17 @@ export default function MoodDashboardPage() {
         if (from) params.set('from', from);
         if (to) params.set('to', to);
         if (categoryId) params.set('categoryId', categoryId);
-        if (mood) params.set('mood', mood);
         const qs = params.toString();
-        const res = await fetch(`/api/mood/history${qs ? `?${qs}` : ''}`);
+        const res = await fetch(`/api/journal/history${qs ? `?${qs}` : ''}`);
         const data = (await res.json().catch(() => ({}))) as {
           entries?: Entry[];
           error?: string;
         };
         if (!alive) return;
         if (!res.ok) {
-          if (initialLoad) {
-            setHasFatalError(true);
-          } else {
-            setErrorMsg(data.error || 'could not load history');
+          if (initialLoad) setHasFatalError(true);
+          else {
+            setErrorMsg(data.error || 'could not load entries');
             setEntries([]);
           }
         } else {
@@ -86,11 +88,8 @@ export default function MoodDashboardPage() {
         }
       } catch {
         if (!alive) return;
-        if (initialLoad) {
-          setHasFatalError(true);
-        } else {
-          setErrorMsg('network error, try again');
-        }
+        if (initialLoad) setHasFatalError(true);
+        else setErrorMsg('network error, try again');
       } finally {
         if (alive) {
           setLoading(false);
@@ -101,7 +100,7 @@ export default function MoodDashboardPage() {
     return () => {
       alive = false;
     };
-  }, [from, to, categoryId, mood, reloadKey]);
+  }, [from, to, categoryId, reloadKey]);
 
   const retry = () => {
     setHasFatalError(false);
@@ -113,21 +112,18 @@ export default function MoodDashboardPage() {
     let n = 0;
     if (from || to) n++;
     if (categoryId) n++;
-    if (mood) n++;
     return n;
-  }, [from, to, categoryId, mood]);
+  }, [from, to, categoryId]);
 
   const clearAll = () => {
     setFrom('');
     setTo('');
     setCategoryId('');
-    setMood('');
     setOpenFilter(null);
   };
 
   const toggle = (k: FilterKey) => setOpenFilter((prev) => (prev === k ? null : k));
 
-  // ---- styles ----
   const pill = (active: boolean, open: boolean): CSSProperties => ({
     padding: '8px 16px',
     border: `1.5px solid ${active || open ? C.darkPink : C.lineColor}`,
@@ -187,12 +183,12 @@ export default function MoodDashboardPage() {
     marginRight: 6,
   };
 
-  const row: CSSProperties = {
+  const card: CSSProperties = {
     display: 'grid',
-    gridTemplateColumns: '120px 1fr 1fr',
-    gap: 16,
-    alignItems: 'center',
-    padding: '14px 4px',
+    gridTemplateColumns: '120px 1fr 140px',
+    gap: 18,
+    alignItems: 'start',
+    padding: '16px 4px',
     borderBottom: `1px solid ${C.inputBorderDefault}`,
     fontFamily: mono,
     fontSize: 13,
@@ -200,7 +196,6 @@ export default function MoodDashboardPage() {
   };
 
   const datePill = (d: string): string => {
-    // YYYY-MM-DD → DD MMM YYYY in user-friendly form.
     const [y, m, day] = d.split('-');
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return `${day} ${months[parseInt(m, 10) - 1]} ${y}`;
@@ -222,7 +217,7 @@ export default function MoodDashboardPage() {
 
   if (initialLoad) {
     return (
-      <PageShell title="mood tracker" subtitle="Your past entries">
+      <PageShell title="journal" subtitle="Your past entries">
         <Loading minHeight={420} />
       </PageShell>
     );
@@ -251,8 +246,7 @@ export default function MoodDashboardPage() {
   }
 
   return (
-    <PageShell title="mood tracker" subtitle="Your past entries">
-      {/* Filter toolbar + add action — same row */}
+    <PageShell title="journal" subtitle="Your past entries">
       <div
         style={{
           display: 'flex',
@@ -272,16 +266,13 @@ export default function MoodDashboardPage() {
         >
           Category
         </button>
-        <button type="button" style={pill(Boolean(mood), openFilter === 'mood')} onClick={() => toggle('mood')}>
-          Mood
-        </button>
         <button type="button" style={clearBtn} onClick={clearAll} disabled={!activeCount}>
           Clear filters{activeCount ? ` (${activeCount})` : ''}
         </button>
         <button
           type="button"
           style={{ ...addBtn, marginLeft: 'auto' }}
-          onClick={() => router.push('/mood')}
+          onClick={() => router.push('/journal')}
           onMouseEnter={(e) => (e.currentTarget.style.background = C.btnHover)}
           onMouseLeave={(e) => (e.currentTarget.style.background = C.btnColor)}
         >
@@ -312,21 +303,6 @@ export default function MoodDashboardPage() {
         </div>
       ) : null}
 
-      {openFilter === 'mood' ? (
-        <div style={filterPanel}>
-          <span style={fieldLabel}>Mood</span>
-          <select value={mood} onChange={(e) => setMood(e.target.value)} style={{ ...inputStyle, minWidth: 220 }}>
-            <option value="">— all —</option>
-            {MOODS.map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
-          </select>
-        </div>
-      ) : null}
-
-      {/* Results */}
       <div style={{ marginTop: 28 }}>
         {errorMsg ? (
           <div
@@ -351,24 +327,13 @@ export default function MoodDashboardPage() {
             ...T.tinyLabel(),
             color: C.textSecondary,
             marginBottom: 8,
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
           }}
         >
-          <span>
-            {loading ? 'loading…' : `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`}
-          </span>
+          {loading ? 'loading…' : `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`}
         </div>
 
         {!loading && entries.length === 0 ? (
-          <div
-            style={{
-              ...T.sectionPhrase(),
-              padding: '28px 8px',
-              textAlign: 'center',
-            }}
-          >
+          <div style={{ ...T.sectionPhrase(), padding: '28px 8px', textAlign: 'center' }}>
             no entries match these filters yet.
           </div>
         ) : null}
@@ -377,8 +342,8 @@ export default function MoodDashboardPage() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '120px 1fr 1fr',
-              gap: 16,
+              gridTemplateColumns: '120px 1fr 140px',
+              gap: 18,
               padding: '8px 4px',
               borderBottom: `1.5px solid ${C.lineColor}`,
               ...T.tinyLabel(),
@@ -386,18 +351,18 @@ export default function MoodDashboardPage() {
             }}
           >
             <span>Date</span>
-            <span>Mood</span>
-            <span>Category</span>
+            <span>Entry</span>
+            <span style={{ textAlign: 'right' }}>Category</span>
           </div>
         ) : null}
 
         {entries.map((e) => (
-          <div key={e.id} style={row}>
+          <div key={e.id} style={card}>
             <span style={{ color: C.textSecondary }}>{datePill(e.entryDate)}</span>
-            <span style={{ color: C.darkPink, fontWeight: 600, letterSpacing: '0.06em' }}>
-              {e.mood.toLowerCase()}
+            <span style={{ color: C.textPrimary, lineHeight: 1.6 }}>
+              {plainPreview(e.content) || <em style={{ color: C.textSecondary }}>(empty)</em>}
             </span>
-            <span style={{ color: e.categoryName ? C.textPrimary : C.textSecondary, opacity: e.categoryName ? 1 : 0.6 }}>
+            <span style={{ color: e.categoryName ? C.textPrimary : C.textSecondary, opacity: e.categoryName ? 1 : 0.6, textAlign: 'right' }}>
               {e.categoryName ?? '—'}
             </span>
           </div>

@@ -3,32 +3,26 @@
 import { useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { C, T, mono } from '@/lib/ui/theme';
-import ActiveHabitCard from './habits/ActiveHabitCard';
+import ActiveHabitCard, { type ActiveHabit } from './habits/ActiveHabitCard';
 import PlaceholderHabitCard from './habits/PlaceholderHabitCard';
-import type { ActiveHabit, PlaceholderHabit } from './habits/types';
+import { currentRound, todayLocalIso } from '@/lib/habits/days';
 
-type HabitSlot =
-  | { kind: 'active'; data: ActiveHabit }
-  | { kind: 'placeholder'; data: PlaceholderHabit };
+const SLOTS = 8;
 
-const HABITS: HabitSlot[] = [
-  { kind: 'active', data: { name: 'habit 1', round: 1, cells: [true, true, true, false, true, true, true, true, false, true, true, true, true, false, true, true, true, true] } },
-  { kind: 'active', data: { name: 'habit 2', round: 2, cells: [true, true, false, true, true] } },
-  { kind: 'active', data: { name: 'habit 3', round: 1, cells: [true, false, true, true, false, true, true, true, false] } },
-  { kind: 'active', data: { name: 'habit 4', round: 3, cells: [true, true, true, true, true, true, true] } },
-  { kind: 'placeholder', data: { name: 'habit 5' } },
-  { kind: 'placeholder', data: { name: 'habit 6' } },
-  { kind: 'placeholder', data: { name: 'habit 7' } },
-  { kind: 'placeholder', data: { name: 'habit 8' } },
-];
+type Props = {
+  habits: ActiveHabit[];
+  onToggleCheckin: (habitId: string, date: string, currentDone: boolean) => void;
+};
 
-export default function HabitsWidget() {
+export default function HabitsWidget({ habits, onToggleCheckin }: Props) {
   const router = useRouter();
+  const today = todayLocalIso();
   const [btnHover, setBtnHover] = useState<'update' | 'add' | 'link' | null>(null);
 
-  const statsWrap: CSSProperties = {
-    position: 'relative',
-  };
+  const visible = habits.slice(0, SLOTS);
+  const placeholderCount = Math.max(0, SLOTS - visible.length);
+
+  const statsWrap: CSSProperties = { position: 'relative' };
   const statsBack: CSSProperties = {
     position: 'absolute',
     inset: 0,
@@ -106,6 +100,16 @@ export default function HabitsWidget() {
     transition: 'color 0.18s ease, border-color 0.18s ease',
   };
 
+  // Top-3 stats by completion in the current round (just a snapshot).
+  const stats = visible
+    .map((h) => {
+      const round = currentRound(h.startDate, today);
+      const totalDone = h.checkins.filter((c) => c.done).length;
+      return { name: h.name, round, totalDone, target: h.targetDays };
+    })
+    .sort((a, b) => b.totalDone - a.totalDone)
+    .slice(0, 5);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', minWidth: 0 }}>
       <div style={{ ...T.tinyLabel(), marginBottom: 4 }}>Habit tracker</div>
@@ -125,21 +129,16 @@ export default function HabitsWidget() {
               width: '100%',
             }}
           >
-            {HABITS.map((slot) =>
-              slot.kind === 'active' ? (
-                <ActiveHabitCard
-                  key={slot.data.name}
-                  habit={slot.data}
-                  onMore={() => router.push(`/habits?name=${encodeURIComponent(slot.data.name)}`)}
-                />
-              ) : (
-                <PlaceholderHabitCard key={slot.data.name} habit={slot.data} />
-              ),
-            )}
+            {visible.map((h) => (
+              <ActiveHabitCard key={h.id} habit={h} onToggle={onToggleCheckin} />
+            ))}
+            {Array.from({ length: placeholderCount }).map((_, i) => (
+              <PlaceholderHabitCard key={`ph-${i}`} />
+            ))}
           </div>
           <button
             type="button"
-            onClick={() => router.push('/habits?view=all')}
+            onClick={() => router.push('/habits')}
             onMouseEnter={() => setBtnHover('link')}
             onMouseLeave={() => setBtnHover(null)}
             style={linkStyle}
@@ -153,11 +152,21 @@ export default function HabitsWidget() {
             <div style={statsBack} />
             <div style={statsCard}>
               <div style={statsTitle}>some stats…</div>
-              <div style={statRow}><span>habit 1</span><span>R1 · 14/22</span></div>
-              <div style={statRow}><span>habit 4</span><span>R3 · 7/22</span></div>
-              <div style={statRow}><span>habit 6</span><span>R1 · 5/22</span></div>
-              <div style={statRow}><span>habit 2</span><span>R2 · 4/22</span></div>
-              <div style={{ ...statRow, borderBottom: 'none' }}><span>habit 3</span><span>R1 · 6/22</span></div>
+              {stats.length === 0 ? (
+                <div style={{ ...statRow, borderBottom: 'none', justifyContent: 'flex-start' }}>
+                  no habits yet
+                </div>
+              ) : (
+                stats.map((s, i) => (
+                  <div
+                    key={s.name}
+                    style={{ ...statRow, borderBottom: i === stats.length - 1 ? 'none' : statRow.borderBottom }}
+                  >
+                    <span>{s.name}</span>
+                    <span>R{s.round} · {s.totalDone}/{s.target}</span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -168,7 +177,7 @@ export default function HabitsWidget() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 'auto' }}>
             <button
               type="button"
-              onClick={() => router.push('/habits?mode=update')}
+              onClick={() => router.push('/habits')}
               onMouseEnter={() => setBtnHover('update')}
               onMouseLeave={() => setBtnHover(null)}
               style={filledBtn('update')}
@@ -177,7 +186,7 @@ export default function HabitsWidget() {
             </button>
             <button
               type="button"
-              onClick={() => router.push('/habits')}
+              onClick={() => router.push('/habits/new')}
               onMouseEnter={() => setBtnHover('add')}
               onMouseLeave={() => setBtnHover(null)}
               style={outlineBtn('add')}

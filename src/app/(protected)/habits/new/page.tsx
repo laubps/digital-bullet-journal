@@ -4,37 +4,22 @@ import { useEffect, useState, type CSSProperties, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { C, mono } from '@/lib/ui/theme';
 import PageShell from '@/lib/ui/PageShell';
-import PaperSheet from '@/components/dashboard/PaperSheet';
-import RichTextEditor from '@/components/dashboard/RichTextEditor';
 
 type Category = { id: string; name: string };
 
-function todayLocalIso(): string {
-  const d = new Date();
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
-}
+const MIN_DAYS = 22;
+const MAX_DAYS = 365;
 
-export default function JournalPage() {
+export default function NewHabitPage() {
   const router = useRouter();
-  const today = todayLocalIso();
-  const [date, setDate] = useState(today);
+  const [name, setName] = useState('');
+  const [targetDaysStr, setTargetDaysStr] = useState(String(MIN_DAYS));
   const [categoryId, setCategoryId] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
-  const [html, setHtml] = useState('');
   const [hover, setHover] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [editorKey, setEditorKey] = useState(0);
-
-  useEffect(() => {
-    if (!successMsg) return;
-    const t = setTimeout(() => setSuccessMsg(null), 3500);
-    return () => clearTimeout(t);
-  }, [successMsg]);
 
   useEffect(() => {
     let alive = true;
@@ -45,7 +30,7 @@ export default function JournalPage() {
         const data = (await res.json()) as { categories?: Category[] };
         if (alive && Array.isArray(data.categories)) setCategories(data.categories);
       } catch {
-        // optional field; ignore
+        // optional
       }
     })();
     return () => {
@@ -53,33 +38,44 @@ export default function JournalPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!successMsg) return;
+    const t = setTimeout(() => setSuccessMsg(null), 2500);
+    return () => clearTimeout(t);
+  }, [successMsg]);
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (submitting) return;
+    if (submitting || !name.trim()) return;
+
+    const parsed = parseInt(targetDaysStr, 10);
+    if (Number.isNaN(parsed) || parsed < MIN_DAYS || parsed > MAX_DAYS) {
+      setErrorMsg(`duration must be between ${MIN_DAYS} and ${MAX_DAYS} days`);
+      return;
+    }
+
     setSubmitting(true);
     setErrorMsg(null);
     setSuccessMsg(null);
     try {
-      const res = await fetch('/api/journal', {
+      const res = await fetch('/api/habits', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          entryDate: date,
-          content: html,
+          name: name.trim(),
+          targetDays: parsed,
           categoryId: categoryId || null,
         }),
       });
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as { error?: string };
-        setErrorMsg(data.error || 'could not save entry');
+        setErrorMsg(data.error || 'could not create habit');
         setSubmitting(false);
         return;
       }
-      setSuccessMsg('entry saved');
-      setHtml('');
-      setCategoryId('');
-      setEditorKey((k) => k + 1); // force-clear the Tiptap editor instance
-      setSubmitting(false);
+      setSuccessMsg('habit created');
+      // Return the user to whichever page opened the form.
+      setTimeout(() => router.back(), 600);
     } catch {
       setErrorMsg('network error, try again');
       setSubmitting(false);
@@ -140,14 +136,35 @@ export default function JournalPage() {
     opacity: submitting ? 0.6 : 1,
   };
 
+  const helper: CSSProperties = {
+    fontFamily: mono,
+    fontSize: 10,
+    letterSpacing: '0.06em',
+    color: C.textSecondary,
+    marginTop: 6,
+  };
+
   return (
-    <PageShell title="better write it down" subtitle="Journal entry" maxWidth={1080}>
+    <PageShell title="start a new habit" subtitle="Habit tracker">
       <form onSubmit={onSubmit}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 240px', gap: 24, marginBottom: 20 }}>
+        <div style={{ marginBottom: 24 }}>
+          <label htmlFor="habit-name" style={label}>Habit name</label>
+          <input
+            id="habit-name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. morning walk"
+            disabled={submitting}
+            style={inputStyle}
+          />
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
           <div>
-            <label htmlFor="j-category" style={label}>Category (optional)</label>
+            <label htmlFor="habit-category" style={label}>Category (optional)</label>
             <select
-              id="j-category"
+              id="habit-category"
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
               disabled={submitting}
@@ -155,31 +172,30 @@ export default function JournalPage() {
             >
               <option value="">— none —</option>
               {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
+                <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
           </div>
           <div>
-            <label htmlFor="j-date" style={label}>Date</label>
+            <label htmlFor="habit-days" style={label}>Target days (min {MIN_DAYS})</label>
             <input
-              id="j-date"
-              type="date"
-              value={date}
-              max={today}
-              onChange={(e) => setDate(e.target.value)}
+              id="habit-days"
+              type="number"
+              min={MIN_DAYS}
+              max={MAX_DAYS}
+              value={targetDaysStr}
+              onChange={(e) => setTargetDaysStr(e.target.value)}
+              onBlur={() => {
+                const n = parseInt(targetDaysStr, 10);
+                if (Number.isNaN(n) || n < MIN_DAYS) setTargetDaysStr(String(MIN_DAYS));
+                else if (n > MAX_DAYS) setTargetDaysStr(String(MAX_DAYS));
+                else setTargetDaysStr(String(n));
+              }}
               disabled={submitting}
               style={inputStyle}
             />
+            <div style={helper}>habits take at least {MIN_DAYS} days to take root.</div>
           </div>
-        </div>
-
-        <div style={{ marginBottom: 48 }}>
-          <span style={label}>Your entry</span>
-          <PaperSheet style={{ minHeight: 420 }} showBack={false}>
-            <RichTextEditor key={editorKey} minHeight={360} onChange={setHtml} toolbarBg="#fff" />
-          </PaperSheet>
         </div>
 
         {errorMsg ? (
@@ -194,13 +210,11 @@ export default function JournalPage() {
               color: C.danger,
               fontFamily: mono,
               fontSize: 12,
-              letterSpacing: '0.06em',
             }}
           >
             ✕ {errorMsg}
           </div>
         ) : null}
-
         {successMsg ? (
           <div
             role="status"
@@ -214,14 +228,23 @@ export default function JournalPage() {
               color: C.success,
               fontFamily: mono,
               fontSize: 12,
-              letterSpacing: '0.06em',
             }}
           >
             ✓ {successMsg}
           </div>
         ) : null}
 
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button
+            type="submit"
+            onMouseEnter={() => setHover(true)}
+            onMouseLeave={() => setHover(false)}
+            style={submitBtn}
+            disabled={submitting || !name.trim()}
+            aria-busy={submitting}
+          >
+            {submitting ? 'Saving…' : 'Add habit'}
+          </button>
           <button
             type="button"
             onClick={() => router.back()}
@@ -229,16 +252,6 @@ export default function JournalPage() {
             disabled={submitting}
           >
             Cancel
-          </button>
-          <button
-            type="submit"
-            onMouseEnter={() => setHover(true)}
-            onMouseLeave={() => setHover(false)}
-            style={submitBtn}
-            disabled={submitting}
-            aria-busy={submitting}
-          >
-            {submitting ? 'Saving…' : 'Save entry'}
           </button>
         </div>
       </form>

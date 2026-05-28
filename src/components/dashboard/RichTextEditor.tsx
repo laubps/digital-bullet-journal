@@ -9,6 +9,8 @@ type Props = {
   initialContent?: string;
   minHeight?: number;
   onChange?: (html: string) => void;
+  /** Background color of the toolbar strip. Defaults to theme headerBg (pink). */
+  toolbarBg?: string;
 };
 
 function ToolbarBtn({
@@ -43,7 +45,12 @@ function ToolbarBtn({
   );
 }
 
-export default function RichTextEditor({ initialContent = '', minHeight = 280, onChange }: Props) {
+export default function RichTextEditor({
+  initialContent = '',
+  minHeight = 280,
+  onChange,
+  toolbarBg = C.headerBg,
+}: Props) {
   const editor = useEditor({
     extensions: [StarterKit],
     content: initialContent,
@@ -65,7 +72,7 @@ export default function RichTextEditor({ initialContent = '', minHeight = 280, o
     gap: 6,
     padding: '8px 10px',
     borderBottom: `1px solid ${C.lineColor}`,
-    background: C.headerBg,
+    background: toolbarBg,
   };
 
   return (

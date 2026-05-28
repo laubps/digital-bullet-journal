@@ -4,6 +4,7 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import { C, T } from '@/lib/ui/theme';
 import MoodWidget, { type MoodSummary } from '@/components/dashboard/MoodWidget';
 import HabitsWidget from '@/components/dashboard/HabitsWidget';
+import type { ActiveHabit } from '@/components/dashboard/habits/ActiveHabitCard';
 import JournalWidget from '@/components/dashboard/JournalWidget';
 import EmotionsPlaceholder from '@/components/dashboard/EmotionsPlaceholder';
 import PageBackground from '@/components/PageBackground';
@@ -23,6 +24,7 @@ function todayLocalIso(): string {
 export default function DashboardClient() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [moodSummary, setMoodSummary] = useState<MoodSummary | null>(null);
+  const [habits, setHabits] = useState<ActiveHabit[] | null>(null);
   const [ready, setReady] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
@@ -36,11 +38,44 @@ export default function DashboardClient() {
     setHasError(false);
     (async () => {
       try {
-        const moodRes = await fetch(`/api/mood?date=${todayLocalIso()}`);
+        const [moodRes, habitsRes] = await Promise.all([
+          fetch(`/api/mood?date=${todayLocalIso()}`),
+          fetch('/api/habits?active=true'),
+        ]);
         if (!moodRes.ok) throw new Error(`mood ${moodRes.status}`);
+        if (!habitsRes.ok) throw new Error(`habits ${habitsRes.status}`);
+
         const mood = (await moodRes.json()) as MoodSummary;
+        const habitsData = (await habitsRes.json()) as {
+          habits: Array<{
+            id: string;
+            name: string;
+            targetDays: number;
+            startDate: string;
+          }>;
+        };
+
+        // Fetch each habit's check-ins in parallel.
+        const enriched = await Promise.all(
+          habitsData.habits.map(async (h) => {
+            const r = await fetch(`/api/habits/${h.id}`);
+            if (!r.ok) throw new Error(`habit-detail ${r.status}`);
+            const d = (await r.json()) as {
+              habit: { checkins: Array<{ checkDate: string; done: boolean }> };
+            };
+            return {
+              id: h.id,
+              name: h.name,
+              targetDays: h.targetDays,
+              startDate: h.startDate,
+              checkins: d.habit.checkins,
+            } satisfies ActiveHabit;
+          }),
+        );
+
         if (!alive) return;
         setMoodSummary(mood);
+        setHabits(enriched);
         setReady(true);
       } catch {
         if (!alive) return;
@@ -55,12 +90,54 @@ export default function DashboardClient() {
 
   const retry = () => setReloadKey((k) => k + 1);
 
+  const toggleCheckin = async (habitId: string, date: string, currentDone: boolean) => {
+    const nextDone = !currentDone;
+    // Optimistic update on the local state.
+    setHabits((prev) =>
+      prev
+        ? prev.map((h) => {
+            if (h.id !== habitId) return h;
+            const others = h.checkins.filter((c) => c.checkDate !== date);
+            return {
+              ...h,
+              checkins: nextDone ? [...others, { checkDate: date, done: true }] : others,
+            };
+          })
+        : prev,
+    );
+    try {
+      const res = await fetch(`/api/habits/${habitId}/checkins`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ checkDate: date, done: nextDone }),
+      });
+      if (!res.ok) throw new Error('checkin failed');
+    } catch {
+      // Revert on failure.
+      setHabits((prev) =>
+        prev
+          ? prev.map((h) => {
+              if (h.id !== habitId) return h;
+              const others = h.checkins.filter((c) => c.checkDate !== date);
+              return {
+                ...h,
+                checkins: currentDone ? [...others, { checkDate: date, done: true }] : others,
+              };
+            })
+          : prev,
+      );
+    }
+  };
+
   const page: CSSProperties = {
     position: 'relative',
     minHeight: '100vh',
     width: '100%',
-    padding: '32px 28px 56px',
+    padding: '32px 28px',
     overflow: 'hidden',
+    display: 'flex',
+    alignItems: 'safe center',
+    justifyContent: 'safe center',
   };
 
   const outer: CSSProperties = {
@@ -187,7 +264,7 @@ export default function DashboardClient() {
 
           {/* Body */}
           <div style={body}>
-            {!ready || !moodSummary ? (
+            {!ready || !moodSummary || !habits ? (
               <Loading minHeight={760} />
             ) : (
               <>
@@ -205,7 +282,7 @@ export default function DashboardClient() {
                     <MoodWidget summary={moodSummary} />
                   </div>
                   <div>
-                    <HabitsWidget />
+                    <HabitsWidget habits={habits} onToggleCheckin={toggleCheckin} />
                   </div>
                 </div>
 
