@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep",
+      "Bash(cat *)",
+      "Bash(ls *)",
+      "Bash(dir *)",
+      "Bash(type *)"
+    ]
+  }
+}

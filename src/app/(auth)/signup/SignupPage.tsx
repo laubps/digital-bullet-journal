@@ -2,33 +2,12 @@
 
 import { useEffect, useState, type CSSProperties, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import BackgroundVideo from '../login/BackgroundVideo';
 import RainCanvas from '../login/RainCanvas';
+import PageBackground from '@/components/PageBackground';
+import { C, T, mono, script } from '@/lib/ui/theme';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 8;
-
-const C = {
-  pink: '#f192b5',
-  darkPink: '#831633',
-  cardBg: '#ffffff',
-  headerBg: '#ecd0dc',
-  btnColor: '#e8a9c6',
-  btnHover: '#d48aab',
-  lineColor: '#2a1f24',
-  outerCard: '#969753',
-  bodyBg: '#252122',
-  textPrimary: '#2a1f24',
-  textSecondary: '#8a7068',
-  textSubtle: 'rgba(131,22,51,0.2)',
-  inputBorderDefault: 'rgba(42,31,36,0.25)',
-  inputBorderFocus: '#2a1f24',
-  overlayBg: 'rgba(20,18,18,0.55)',
-};
-
-const serif = "'Times New Roman', 'Georgia', serif";
-const mono = "var(--font-space-mono), 'Space Mono', monospace";
-const script = "var(--font-dancing-script), 'Dancing Script', cursive";
 
 type FieldKey = 'firstName' | 'lastName' | 'email' | 'password' | 'confirmPassword';
 
@@ -54,14 +33,11 @@ export default function SignupPage() {
   const [submitted, setSubmitted] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [btnHover, setBtnHover] = useState(false);
-  const [rainDone, setRainDone] = useState(false);
 
   const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
-    const t = setTimeout(() => setRainDone(true), 5000);
-    return () => clearTimeout(t);
   }, []);
 
   const set = (k: FieldKey, v: string) => {
@@ -143,22 +119,11 @@ export default function SignupPage() {
     position: 'relative',
     minHeight: '100vh',
     width: '100%',
-    backgroundColor: rainDone ? C.outerCard : C.bodyBg,
-    transition: 'background-color 1.5s ease',
     overflow: 'hidden',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     padding: '24px',
-  };
-
-  const overlayStyle: CSSProperties = {
-    position: 'fixed',
-    inset: 0,
-    backgroundColor: rainDone ? 'rgba(150,151,83,0.2)' : C.overlayBg,
-    transition: 'background-color 1.5s ease',
-    zIndex: 1,
-    pointerEvents: 'none',
   };
 
   const outerCardStyle: CSSProperties = {
@@ -197,16 +162,7 @@ export default function SignupPage() {
     position: 'relative',
   };
 
-  const titleStyle: CSSProperties = {
-    fontFamily: serif,
-    fontSize: '52px',
-    fontWeight: 400,
-    letterSpacing: '0.08em',
-    textTransform: 'uppercase',
-    color: C.darkPink,
-    textShadow: '1px 2px 0 rgba(131,22,51,0.12)',
-    lineHeight: 1,
-  };
+  const titleStyle: CSSProperties = T.brandTitle(52);
 
   const stampBoxStyle: CSSProperties = {
     width: '72px',
@@ -261,22 +217,9 @@ export default function SignupPage() {
     whiteSpace: 'nowrap',
   };
 
-  const quoteStyle: CSSProperties = {
-    fontFamily: serif,
-    fontSize: '28px',
-    fontStyle: 'italic',
-    color: C.textPrimary,
-    lineHeight: 1.5,
-  };
+  const quoteStyle: CSSProperties = T.quote();
 
-  const labelTiny: CSSProperties = {
-    fontFamily: mono,
-    fontSize: '10px',
-    fontWeight: 500,
-    letterSpacing: '0.18em',
-    textTransform: 'uppercase',
-    color: C.textSecondary,
-  };
+  const labelTiny: CSSProperties = T.label();
 
   const labelSignUp: CSSProperties = {
     ...labelTiny,
@@ -406,8 +349,7 @@ export default function SignupPage() {
 
   return (
     <main style={pageStyle}>
-      <BackgroundVideo />
-      <div style={overlayStyle} />
+      <PageBackground videoSrc="/videos/8114287-uhd_4096_2160_25fps.mp4" />
       <RainCanvas />
 
       <div style={outerCardStyle}>
