@@ -263,4 +263,4 @@ El módulo de Analizador de Emociones, planificado para la siguiente versión, r
 | Materia | Desarrollo de Aplicaciones Web en la Nube y Móviles |
 | Profesor | ZEUS EMANUEL GUTIERREZ COBIAN |
 | Integrante | Laura |
-| Ciclo escolar | 2025 |
+| Ciclo escolar | 2026 |
