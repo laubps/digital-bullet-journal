@@ -23,6 +23,10 @@ export const C = {
   placeholderBorder: '#cbd5d1',
   placeholderText: '#9ca3af',
   placeholderLine: '#d1d5db',
+  success: '#2f7d4f',
+  successBg: '#e6f4ec',
+  danger: '#9a1f2f',
+  dangerBg: '#fbeaec',
 } as const;
 
 export const serif = "'Times New Roman', 'Georgia', serif";
@@ -47,7 +51,7 @@ export const T = {
     lineHeight: 1,
   }),
 
-  /** Section subtitle ("how you feeling today", "habits give us…", "better write it down"). */
+  /** Section subtitle ("today I feel...", "habits give us…", "better write it down"). */
   sectionTitle: (): CSSProperties => ({
     fontFamily: serif,
     fontSize: 22,

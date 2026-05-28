@@ -10,7 +10,7 @@ export default function JournalWidget() {
   const router = useRouter();
   const [btnHover, setBtnHover] = useState<'add' | 'date' | null>(null);
 
-  const btnStyle = (key: 'add' | 'date'): CSSProperties => ({
+  const outlineBtn = (key: 'add' | 'date'): CSSProperties => ({
     ...T.button(),
     fontSize: 11,
     padding: '8px 16px',
@@ -20,6 +20,18 @@ export default function JournalWidget() {
     color: btnHover === key ? '#fff' : C.textPrimary,
     cursor: 'pointer',
     transition: 'background 0.18s ease, color 0.18s ease',
+  });
+
+  const filledBtn = (key: 'add' | 'date'): CSSProperties => ({
+    ...T.button(),
+    fontSize: 11,
+    padding: '8px 16px',
+    border: 'none',
+    borderRadius: 6,
+    background: btnHover === key ? C.btnHover : C.btnColor,
+    color: '#fff',
+    cursor: 'pointer',
+    transition: 'background 0.18s ease',
   });
 
   return (
@@ -33,7 +45,7 @@ export default function JournalWidget() {
             onClick={() => router.push('/journal')}
             onMouseEnter={() => setBtnHover('add')}
             onMouseLeave={() => setBtnHover(null)}
-            style={btnStyle('add')}
+            style={filledBtn('add')}
           >
             Add entry
           </button>
@@ -42,7 +54,7 @@ export default function JournalWidget() {
             onClick={() => router.push('/journal?date=other')}
             onMouseEnter={() => setBtnHover('date')}
             onMouseLeave={() => setBtnHover(null)}
-            style={btnStyle('date')}
+            style={outlineBtn('date')}
           >
             To other date
           </button>

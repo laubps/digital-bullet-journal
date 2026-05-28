@@ -66,7 +66,7 @@ export default function HabitsWidget() {
     borderBottom: `1px dashed ${C.placeholderLine}`,
   };
 
-  const btnStyle = (key: 'update' | 'add'): CSSProperties => ({
+  const outlineBtn = (key: 'update' | 'add'): CSSProperties => ({
     ...T.button(),
     fontSize: 10,
     padding: '8px 14px',
@@ -76,6 +76,19 @@ export default function HabitsWidget() {
     color: btnHover === key ? '#fff' : C.textPrimary,
     cursor: 'pointer',
     transition: 'background 0.18s ease, color 0.18s ease',
+    width: '100%',
+  });
+
+  const filledBtn = (key: 'update' | 'add'): CSSProperties => ({
+    ...T.button(),
+    fontSize: 10,
+    padding: '8px 14px',
+    border: 'none',
+    borderRadius: 6,
+    background: btnHover === key ? C.btnHover : C.btnColor,
+    color: '#fff',
+    cursor: 'pointer',
+    transition: 'background 0.18s ease',
     width: '100%',
   });
 
@@ -158,7 +171,7 @@ export default function HabitsWidget() {
               onClick={() => router.push('/habits?mode=update')}
               onMouseEnter={() => setBtnHover('update')}
               onMouseLeave={() => setBtnHover(null)}
-              style={btnStyle('update')}
+              style={filledBtn('update')}
             >
               Update tracker
             </button>
@@ -167,7 +180,7 @@ export default function HabitsWidget() {
               onClick={() => router.push('/habits')}
               onMouseEnter={() => setBtnHover('add')}
               onMouseLeave={() => setBtnHover(null)}
-              style={btnStyle('add')}
+              style={outlineBtn('add')}
             >
               Add new habit
             </button>

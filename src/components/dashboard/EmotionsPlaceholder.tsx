@@ -6,8 +6,7 @@ import { C, T } from '@/lib/ui/theme';
 export default function EmotionsPlaceholder() {
   const wrap: CSSProperties = {
     position: 'relative',
-    height: '100%',
-    minHeight: 320,
+    alignSelf: 'start',
   };
   const back: CSSProperties = {
     position: 'absolute',
@@ -24,7 +23,6 @@ export default function EmotionsPlaceholder() {
     border: `1.5px solid ${C.placeholderBorder}`,
     borderRadius: 10,
     padding: '20px 24px',
-    height: '100%',
     boxShadow: '0 4px 14px rgba(0,0,0,0.08)',
     zIndex: 1,
     display: 'flex',

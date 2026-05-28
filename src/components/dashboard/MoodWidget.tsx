@@ -1,25 +1,27 @@
 'use client';
 
-import { useState, type CSSProperties } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { C, T, mono } from '@/lib/ui/theme';
 
 const MOODS = ['Happy', 'Sad', 'Anxious', 'Calm', 'Angry', 'Excited', 'Tired', 'Neutral'] as const;
 
-export default function MoodWidget() {
+export type MoodSummary = {
+  today: string[];
+  last: { mood: string; entryDate: string; createdAt: string } | null;
+};
+
+type Props = {
+  summary: MoodSummary;
+};
+
+export default function MoodWidget({ summary }: Props) {
   const router = useRouter();
-  const [selected, setSelected] = useState<Set<string>>(new Set(['Sad', 'Happy']));
-  const [btnHover, setBtnHover] = useState<'add' | 'date' | 'link' | null>(null);
+  const todaySet = useMemo(() => new Set(summary.today ?? []), [summary.today]);
+  const lastMood = summary.last?.mood ?? null;
+  const [btnHover, setBtnHover] = useState<'add' | 'link' | null>(null);
 
-  const toggle = (m: string) =>
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(m)) next.delete(m);
-      else next.add(m);
-      return next;
-    });
-
-  const itemStyle: CSSProperties = {
+  const itemStyle = (active: boolean): CSSProperties => ({
     display: 'flex',
     alignItems: 'center',
     gap: 10,
@@ -27,9 +29,10 @@ export default function MoodWidget() {
     fontFamily: mono,
     fontSize: 13,
     color: C.textPrimary,
-    cursor: 'pointer',
+    cursor: 'default',
     userSelect: 'none',
-  };
+    opacity: active ? 1 : 0.85,
+  });
 
   const checkStyle = (active: boolean): CSSProperties => ({
     width: 14,
@@ -46,31 +49,35 @@ export default function MoodWidget() {
     transition: 'background 0.15s ease',
   });
 
-  const btnStyle = (key: 'add' | 'date'): CSSProperties => ({
+  const addBtn: CSSProperties = {
     ...T.button(),
     fontSize: 11,
     padding: '8px 16px',
-    border: `1.5px solid ${C.lineColor}`,
+    border: 'none',
     borderRadius: 6,
-    background: btnHover === key ? C.btnColor : 'transparent',
-    color: btnHover === key ? '#fff' : C.textPrimary,
+    background: btnHover === 'add' ? C.btnHover : C.btnColor,
+    color: '#fff',
     cursor: 'pointer',
-    transition: 'background 0.18s ease, color 0.18s ease',
-  });
+    transition: 'background 0.18s ease',
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div style={{ ...T.tinyLabel(), marginBottom: 4 }}>Mood tracker</div>
-      <div style={T.sectionTitle()}>how you feeling today</div>
+      <div style={T.sectionTitle()}>today I feel...</div>
       <div style={{ ...T.sectionPhrase(), marginTop: 4, marginBottom: 20 }}>
         name the emotion, hold it gently.
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 24 }}>
+      <div
+        style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 24 }}
+        role="list"
+        aria-label="today's moods"
+      >
         {MOODS.map((m) => {
-          const active = selected.has(m);
+          const active = todaySet.has(m);
           return (
-            <div key={m} style={itemStyle} onClick={() => toggle(m)}>
+            <div key={m} style={itemStyle(active)} role="listitem" aria-checked={active}>
               <span style={checkStyle(active)}>{active ? '✓' : ''}</span>
               <span style={{ textTransform: 'lowercase' }}>{m}</span>
             </div>
@@ -78,7 +85,9 @@ export default function MoodWidget() {
         })}
       </div>
 
-      <div style={{ ...T.tinyLabel(), marginBottom: 14 }}>&lt;last emotion&gt;</div>
+      <div style={{ ...T.tinyLabel(), marginBottom: 14 }}>
+        {lastMood ? `last emotion: ${lastMood.toLowerCase()}` : '<none yet>'}
+      </div>
 
       <div style={{ display: 'flex', gap: 10, marginTop: 'auto' }}>
         <button
@@ -86,24 +95,15 @@ export default function MoodWidget() {
           onClick={() => router.push('/mood')}
           onMouseEnter={() => setBtnHover('add')}
           onMouseLeave={() => setBtnHover(null)}
-          style={btnStyle('add')}
+          style={addBtn}
         >
-          Add
-        </button>
-        <button
-          type="button"
-          onClick={() => router.push('/mood?date=other')}
-          onMouseEnter={() => setBtnHover('date')}
-          onMouseLeave={() => setBtnHover(null)}
-          style={btnStyle('date')}
-        >
-          To other date
+          Add an entry
         </button>
       </div>
 
       <button
         type="button"
-        onClick={() => router.push('/mood?view=history')}
+        onClick={() => router.push('/mood/dashboard')}
         onMouseEnter={() => setBtnHover('link')}
         onMouseLeave={() => setBtnHover(null)}
         style={{

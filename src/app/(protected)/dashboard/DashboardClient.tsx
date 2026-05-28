@@ -1,14 +1,60 @@
 'use client';
 
-import type { CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { C, T } from '@/lib/ui/theme';
-import MoodWidget from '@/components/dashboard/MoodWidget';
+import MoodWidget, { type MoodSummary } from '@/components/dashboard/MoodWidget';
 import HabitsWidget from '@/components/dashboard/HabitsWidget';
 import JournalWidget from '@/components/dashboard/JournalWidget';
 import EmotionsPlaceholder from '@/components/dashboard/EmotionsPlaceholder';
 import PageBackground from '@/components/PageBackground';
+import SideMenu from '@/components/dashboard/SideMenu';
+import Loading from '@/components/Loading';
+import ErrorState from '@/components/ErrorState';
+import Card from '@/lib/ui/Card';
+
+function todayLocalIso(): string {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
 
 export default function DashboardClient() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [moodSummary, setMoodSummary] = useState<MoodSummary | null>(null);
+  const [ready, setReady] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+
+  // Aggregate every dashboard fetch here so the page only renders once every
+  // widget has the data it needs. Any failure flips the whole view to an
+  // ErrorState — partial / silent failures hide infra problems from the user.
+  useEffect(() => {
+    let alive = true;
+    setReady(false);
+    setHasError(false);
+    (async () => {
+      try {
+        const moodRes = await fetch(`/api/mood?date=${todayLocalIso()}`);
+        if (!moodRes.ok) throw new Error(`mood ${moodRes.status}`);
+        const mood = (await moodRes.json()) as MoodSummary;
+        if (!alive) return;
+        setMoodSummary(mood);
+        setReady(true);
+      } catch {
+        if (!alive) return;
+        setHasError(true);
+        setReady(true);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [reloadKey]);
+
+  const retry = () => setReloadKey((k) => k + 1);
+
   const page: CSSProperties = {
     position: 'relative',
     minHeight: '100vh',
@@ -53,6 +99,10 @@ export default function DashboardClient() {
     flexDirection: 'column',
     gap: 4,
     cursor: 'pointer',
+    background: 'transparent',
+    border: 'none',
+    padding: 6,
+    borderRadius: 4,
   };
 
   const burgerLine: CSSProperties = {
@@ -85,18 +135,48 @@ export default function DashboardClient() {
     margin: '36px 0',
   };
 
+  if (ready && (hasError || !moodSummary)) {
+    return (
+      <main
+        style={{
+          position: 'relative',
+          minHeight: '100vh',
+          width: '100%',
+          padding: '32px 24px',
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'safe center',
+          justifyContent: 'safe center',
+        }}
+      >
+        <PageBackground />
+        <Card maxWidth={560}>
+          <ErrorState onRetry={retry} minHeight={240} />
+        </Card>
+      </main>
+    );
+  }
+
   return (
     <main style={page}>
       <PageBackground />
+      <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
       <div style={outer}>
         <div style={inner}>
           {/* Header — Login-style pink bar */}
           <div style={headerBar}>
-            <div style={burger} aria-label="menu">
+            <button
+              type="button"
+              style={burger}
+              aria-label="open menu"
+              aria-expanded={menuOpen}
+              aria-controls="side-menu"
+              onClick={() => setMenuOpen(true)}
+            >
               <span style={burgerLine} />
               <span style={burgerLine} />
               <span style={burgerLine} />
-            </div>
+            </button>
             <div style={T.brandTitle(36)}>your emotions matter</div>
             <div style={stampBoxStyle}>
               <svg width="24" height="22" viewBox="0 0 24 22" fill={C.darkPink} style={{ opacity: 0.8 }}>
@@ -107,38 +187,44 @@ export default function DashboardClient() {
 
           {/* Body */}
           <div style={body}>
-            {/* Top row: Mood + Habits */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '260px minmax(0, 1fr)',
-                gap: 32,
-                alignItems: 'stretch',
-                minHeight: 380,
-              }}
-            >
-              <div style={{ borderRight: `1px solid ${C.lineColor}`, paddingRight: 28 }}>
-                <MoodWidget />
-              </div>
-              <div>
-                <HabitsWidget />
-              </div>
-            </div>
+            {!ready || !moodSummary ? (
+              <Loading minHeight={760} />
+            ) : (
+              <>
+                {/* Top row: Mood + Habits */}
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '260px minmax(0, 1fr)',
+                    gap: 32,
+                    alignItems: 'stretch',
+                    minHeight: 380,
+                  }}
+                >
+                  <div style={{ borderRight: `1px solid ${C.lineColor}`, paddingRight: 28 }}>
+                    <MoodWidget summary={moodSummary} />
+                  </div>
+                  <div>
+                    <HabitsWidget />
+                  </div>
+                </div>
 
-            <div style={sectionDivider} />
+                <div style={sectionDivider} />
 
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1.4fr 1fr',
-                gap: 72,
-                alignItems: 'stretch',
-                minHeight: 380,
-              }}
-            >
-              <JournalWidget />
-              <EmotionsPlaceholder />
-            </div>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1.4fr 1fr',
+                    gap: 72,
+                    alignItems: 'stretch',
+                    minHeight: 380,
+                  }}
+                >
+                  <JournalWidget />
+                  <EmotionsPlaceholder />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
